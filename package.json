@@ -1,0 +1,17 @@
+{
+  "name": "only-data",
+  "version": "0.1.0",
+  "description": "Reduces objects and object graphs to just their data properties",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "keywords": [],
+  "author": "Greg Beard",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.13.0",
+    "eslint-plugin-jasmine": "^4.1.1",
+    "jasmine": "^3.6.3"
+  }
+}
