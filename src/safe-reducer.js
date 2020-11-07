@@ -1,5 +1,4 @@
 const constants = require("./constants");
-const createReducer = require("./reducer");
 
 class CircularReferenceError extends Error { 
     constructor() {
@@ -7,15 +6,55 @@ class CircularReferenceError extends Error {
     }
 }
 
+function identityReducer(key, value) {
+    return value;
+}
+
+function propertyReducer(include) {
+    return function(key, value) {
+        if (key !== "" && include.indexOf(key) < 0)
+            return;
+
+        return value;
+    };
+}
+
+function reducer(options) {
+
+    /* Use an "identity" reducer if one wasn't 
+     * provided by the caller...
+     */
+    options = options || identityReducer;
+
+    /* The caller can provide an array of property
+     * names to include (if `data` is an object)...
+     */
+    if (Array.isArray(options)) {
+        return safeReduce({
+            errorOnCircularReference: true,
+            reducer: propertyReducer(options),
+        });
+    }
+    else if (typeof options === "function") {
+        return safeReduce({
+            errorOnCircularReference: true,
+            reducer: options,
+        });
+    }
+    else if (options.disableCircularReferenceProtection) {
+        return options.reducer;
+    }
+
+    if (Array.isArray(options.reducer))
+        options.reducer = propertyReducer(options.reducer);
+
+    return safeReduce(options);
+}
+
 function safeReduce(options) {
     let stack = [];
 
     options = options || { };
-    if (typeof options === "function" || Array.isArray(options))
-        options = { reducer: createReducer(options) };
-
-    if (Array.isArray(options.reducer))
-        options.reducer = createReducer(options.reducer);
 
     return function(key, value, stage) {
         if (stage === constants.BEGIN_STAGE)
@@ -26,7 +65,7 @@ function safeReduce(options) {
         if (key !== "" && stack.indexOf(value) >= 0) {
             if (options.indicateCircularWarnings)
                 return { __circular: true };
-            else if(options.errorOnCircularReference)
+            else if(options.errorOnCircularReference === true)
                 throw new CircularReferenceError();
             else
                 return { };
@@ -39,6 +78,4 @@ function safeReduce(options) {
     };
 }
 
-module.exports = {
-    safeReduce,
-};
+module.exports = reducer;

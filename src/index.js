@@ -1,25 +1,11 @@
-const { safeReduce } = require("./safe-reducer");
+const reducer = require("./safe-reducer");
 const constants = require("./constants");
-const createReducer = require("./reducer");
 
-function onlyData(data, options) {
+function onlyData(data, options, recursiveCall) {
 
-    /* TODO(GB):
-     * This should all be the job of `createReducer`...
-     */
-    let reducer;
-    if (!options || typeof options === "function" || Array.isArray(options)) {
-        reducer = safeReduce({
-            reducer: createReducer(options),
-            errorOnCircularReference: true,
-        });
-    }
-    else {
-        options = options || { };
-        if (options.disableCircularReferenceProtection)
-            reducer = createReducer(options.reducer);
-        else
-            reducer = safeReduce(options);
+    let reduce = options;
+    if (!recursiveCall) {
+        reduce = reducer(options);
     }
 
     /* Ignore any non-data properties...
@@ -39,7 +25,7 @@ function onlyData(data, options) {
     /* Recursively convert any array items...
      */
     if (Array.isArray(data))
-        return data.map((item) => onlyData(item, reducer));
+        return data.map((item) => onlyData(item, reduce, true));
 
     /* At this stage, we're assuming `data` is an object
      */
@@ -53,15 +39,15 @@ function onlyData(data, options) {
     /* Ignore this object completely if the reducer
      * returns a falsy value from the "begin" stage...
      */
-    const shouldProcess = reducer.bind(data)("", data, constants.BEGIN_STAGE);
+    const shouldProcess = reduce.bind(data)("", data, constants.BEGIN_STAGE);
 
     let view;
     if (shouldProcess) {
         view = Object.keys(data).reduce(
             (acc, key) => {
-                let inner = reducer.bind(data)(key, data[key]);
+                let inner = reduce.bind(data)(key, data[key]);
 
-                inner = onlyData(inner, reducer);
+                inner = onlyData(inner, reduce, true);
                 if (typeof inner !== "undefined")
                     acc[key] = inner;
 
@@ -74,7 +60,7 @@ function onlyData(data, options) {
     /* Inform the reducer that we've finished this
      * particular object...
      */
-    reducer.bind(data)("", data, constants.END_STAGE);
+    reduce.bind(data)("", data, constants.END_STAGE);
 
     return view;
 }
