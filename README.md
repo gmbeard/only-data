@@ -1,5 +1,10 @@
 ## Only Data
-*Only Data* will strip input down to just its data properties, removing "non-data" types such as functions and symbols. It works on primitive types, objects, arrays of objects, and nested graphs of objects. This can be useful as a pre-serialize step when returning JSON from a webservice, for example.
+*Only Data* will strip input down to just its data properties, removing "non-data" types such as functions and symbols. It works on primitive types, objects, arrays of objects, and nested graphs of objects. 
+
+**Features:**
+
+- Circular reference protection is provided by either throwing (the default), or removing them. 
+- Ability to use a user-provided "reduction" function, allowing fine-grained control over the output.
 
 ### Signature
 
