@@ -6,9 +6,14 @@
   "scripts": {
     "test": "jasmine"
   },
-  "keywords": [],
+  "keywords": [
+      "conversion",
+      "data",
+      "serialization",
+      "utility"
+  ],
   "author": "Greg Beard",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "devDependencies": {
     "eslint": "^7.13.0",
     "eslint-plugin-jasmine": "^4.1.1",
