@@ -1,7 +1,9 @@
 {
-  "name": "only-data",
+  "name": "@gmbeard/only-data",
   "version": "0.1.0",
   "description": "Reduces objects and object graphs to just their data properties",
+  "bugs": "https://github.com/gmbeard/only-data",
+  "homepage": "https://github.com/gmbeard/only-data",
   "main": "src/index.js",
   "scripts": {
     "test": "jasmine"
