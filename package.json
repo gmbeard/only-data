@@ -1,6 +1,6 @@
 {
   "name": "@gmbeard/only-data",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reduces objects and object graphs to just their data properties",
   "bugs": "https://github.com/gmbeard/only-data",
   "homepage": "https://github.com/gmbeard/only-data",
@@ -9,10 +9,10 @@
     "test": "jasmine"
   },
   "keywords": [
-      "conversion",
-      "data",
-      "serialization",
-      "utility"
+    "conversion",
+    "data",
+    "serialization",
+    "utility"
   ],
   "author": "Greg Beard",
   "license": "BSD-3-Clause",
