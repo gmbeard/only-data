@@ -1,6 +1,6 @@
 {
   "name": "@gmbeard/only-data",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Reduces objects and object graphs to just their data properties",
   "bugs": "https://github.com/gmbeard/only-data",
   "homepage": "https://github.com/gmbeard/only-data",
