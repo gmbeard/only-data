@@ -21,28 +21,28 @@ function propertyReducer(include) {
 
 function reducer(options) {
 
-    /* Use an "identity" reducer if one wasn't 
-     * provided by the caller...
-     */
-    options = options || identityReducer;
+    const defaults = { errorOnCircularReference: true };
+    options = options || defaults;
 
-    /* The caller can provide an array of property
-     * names to include (if `data` is an object)...
+    /* If caller doesn't want circular reference protection then
+     * just return their custom reducer (or the identity reducer) without
+     * wrapping it with `safeReduce`...
      */
-    if (Array.isArray(options)) {
-        return safeReduce({
-            errorOnCircularReference: true,
-            reducer: propertyReducer(options),
-        });
+    if (options.disableCircularReferenceProtection) {
+        if (Array.isArray(options.reducer))
+            return propertyReducer(options.reducer);
+
+        return options.reducer || identityReducer;
     }
-    else if (typeof options === "function") {
-        return safeReduce({
-            errorOnCircularReference: true,
+
+    /* The caller can provide either a function, or an array of property
+     * names to include (if input is an object)...
+     */
+    if (typeof options === "function" || Array.isArray(options)) {
+        options = {
+            ...defaults,
             reducer: options,
-        });
-    }
-    else if (options.disableCircularReferenceProtection) {
-        return options.reducer;
+        };
     }
 
     if (Array.isArray(options.reducer))
@@ -53,8 +53,6 @@ function reducer(options) {
 
 function safeReduce(options) {
     let stack = [];
-
-    options = options || { };
 
     return function(key, value, stage) {
         if (stage === constants.BEGIN_STAGE)

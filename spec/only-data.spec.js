@@ -47,4 +47,66 @@ describe("onlyData", function() {
 
         expect(() => onlyData(a)).toThrow();
     });
+
+    it("should allow disabling of circular reference protection", function() {
+
+        let stack = [ ];
+        function circularReferenceDetector(key, value, stage) {
+            if (key === "" && stage === 1)
+                stack.push(this);
+            else if (key === "" && stage === 2)
+                stack = stack.slice(0, stack.indexOf(this));
+
+            if (key !== "" && stack.indexOf(value) >= 0)
+                throw { error: "circular" };
+
+            return value;
+        }
+
+        const parent = { name: "parent" };
+        const child = {
+            name: "obj",
+            value: parent,
+        };
+
+        parent.value = child
+
+        expect(() =>
+            onlyData(parent, {
+                disableCircularReferenceProtection: true,
+                reducer: circularReferenceDetector,
+            })
+        ).toThrow({ error: "circular" });
+    });
+
+    it("should use default reducer with no circular protection", function() {
+
+        const obj = {
+            name: "obj",
+            value: 42,
+            invoke() {
+
+            }
+        };
+
+        const data = onlyData(obj, { disableCircularReferenceProtection: true });
+        expect(data).toEqual({ name: "obj", value: 42 });
+    });
+
+    it("should allow array reducer with no circular protection", function() {
+
+        const obj = {
+            name: "obj",
+            value: 42,
+            invoke() {
+
+            }
+        };
+
+        const data = onlyData(obj, {
+            disableCircularReferenceProtection: true,
+            reducer: [ "name", "value" ],
+        });
+        expect(data).toEqual({ name: "obj", value: 42 });
+    });
 });

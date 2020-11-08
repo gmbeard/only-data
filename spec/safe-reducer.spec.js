@@ -1,6 +1,8 @@
 const { onlyData } = require("../src/index");
 
-describe("safeReduce", function() {
+let input;
+beforeEach(() => {
+
     const parent = {
         name: "parent",
     };
@@ -18,9 +20,13 @@ describe("safeReduce", function() {
 
     parent.children = children;
 
+    input = parent;
+});
+
+describe("safeReduce", function() {
     it("should prevent circular references", function() {
 
-        const result = onlyData(parent, { errorOnCircularReference: false });
+        const result = onlyData(input, { errorOnCircularReference: false });
 
         expect(result.children).toEqual([
             { name: "child1", leaf: { name: "leaf", parent: { } } },
@@ -31,7 +37,7 @@ describe("safeReduce", function() {
 
     it("should honour `indicateCircularWarnings` option", function() {
 
-        const result = onlyData(parent, { indicateCircularWarnings: true });
+        const result = onlyData(input, { indicateCircularWarnings: true });
 
         expect(result).toEqual({
             name: "parent",
@@ -45,7 +51,7 @@ describe("safeReduce", function() {
 
     it("should use inner reducer function", function() {
 
-        const result = onlyData(parent, {
+        const result = onlyData(input, {
             errorOnCircularReference: false,
             reducer: (key, value) => {
                 if (key === "name")
@@ -67,7 +73,7 @@ describe("safeReduce", function() {
     it("should use inner reducer array", function() {
 
         const result =
-            onlyData(parent, {
+            onlyData(input, {
                 errorOnCircularReference: false,
                 reducer: ["name", "children", "leaf", "parent"]
             });
