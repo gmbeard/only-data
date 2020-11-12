@@ -70,22 +70,63 @@ If `options` is an object, it can contain the following settings...
         <td><code>false</code></td>
         <td>If you're sure that the input contains no circular references then setting this option to <code>true</code> will potentially increase performance. <strong>A stack overflow will occur if the input contains any circular references</strong></td>
     </tr>
+    <tr>
+        <td><code>circularReferences</code></td>
+        <td><code>String</code></td>
+        <td></td>
+        <td>Can be one of <code>empty</code>, <code>error</code>, <code>indicate</code>, or <code>remove</code>. Controls how circular references are handled. See <em>Circular Reference Behaviour</em> section.</td>
+    </tr>
 </table>
 
 ### Circular Reference Behaviour
-By default, *Only Data* will throw an error whenever it encounters a circular reference. This will prevent stack overflows. However, you can disable this behaviour with the `errorOnCircularReference: false` option. This will prevent *Only Data* from descending any deeper into the object graph when a circular reference is encountered, instead replacing the offending object with `{ }`.
+By default, *Only Data* will throw an error whenever it encounters a circular reference. This will prevent costly stack overflows. You can control this behaviour using the `circularReferences` option.
+
+`circularReferences: "empty"`: Circular reference objects will be replaced with an empty object (`{ }`)
 
     const a = { name: "A" };
     const b = { name: "B", val: a };
     a.val = b; // This closes the loop and causes a circular reference
 
-    const data = onlyData(a, { errorOnCircularReference: false });
+    const data = onlyData(a, { circularReferences: "empty" });
 
     // data: {
     //   name: "A",
     //   val: {
     //     name: "B",
     //     val: { }
+    //   }
+    // }
+
+`circularReferences: "error"`: An error will be thrown when a circular reference is detected. This is the default behaviour.
+
+`circularReferences: "indicate"`: Indicates circular references in the output by offending objects with `{ __circular: true }`.
+
+    const a = { name: "A" };
+    const b = { name: "B", val: a };
+    a.val = b; // This closes the loop and causes a circular reference
+
+    const data = onlyData(a, { circularReferences: "remove" });
+
+    // data: {
+    //   name: "A",
+    //   val: {
+    //     name: "B",
+    //     val: { __circular: true }
+    //   }
+    // }
+
+`circularReferences: "remove"`: Removes circular reference objects from the graph altogether.
+
+    const a = { name: "A" };
+    const b = { name: "B", val: a };
+    a.val = b; // This closes the loop and causes a circular reference
+
+    const data = onlyData(a, { circularReferences: "remove" });
+
+    // data: {
+    //   name: "A",
+    //   val: {
+    //     name: "B",
     //   }
     // }
 
