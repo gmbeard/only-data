@@ -87,4 +87,25 @@ describe("safeReduce", function() {
             ]
         });
     });
+
+    it("should honour circular reference options", function() {
+
+        const input = { name: "A" };
+        const child = { name: "B", val: input };
+        input.val = child;
+
+        let result;
+
+        result = onlyData( input, { circularReferences: "remove" });
+        expect(result).toEqual({ name: "A", val: { name: "B" } });
+
+        result = onlyData(input, { circularReferences: "empty" });
+        expect(result).toEqual({ name: "A", val: { name: "B", val: { } } });
+
+        result = onlyData(input, { circularReferences: "indicate" });
+        expect(result).toEqual({ name: "A", val: { name: "B", val: { __circular: true } } });
+
+        expect(() => onlyData(input, { circularReferences: "error" }))
+            .toThrow();
+    });
 });

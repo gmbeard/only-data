@@ -1,4 +1,9 @@
 module.exports = {
     BEGIN_STAGE: 1,
     END_STAGE: 2,
+
+    CIRCULAR_ERROR: 3,
+    CIRCULAR_EMPTY: 4,
+    CIRCULAR_INDICATE: 5,
+    CIRCULAR_REMOVE: 6,
 };

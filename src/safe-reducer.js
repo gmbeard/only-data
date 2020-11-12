@@ -21,7 +21,7 @@ function propertyReducer(include) {
 
 function reducer(options) {
 
-    const defaults = { errorOnCircularReference: true };
+    const defaults = { circularReferences: constants.CIRCULAR_ERROR };
     options = options || defaults;
 
     /* If caller doesn't want circular reference protection then
@@ -51,8 +51,41 @@ function reducer(options) {
     return safeReduce(options);
 }
 
+function evaluateOptions(options) {
+
+    if (options.errorOnCircularReference)
+        options.circularReferences = constants.CIRCULAR_ERROR;
+    else if(options.errorOnCircularReference === false)
+        options.circularReferences = constants.CIRCULAR_EMPTY;
+
+    if (options.indicateCircularWarnings)
+        options.circularReferences = constants.CIRCULAR_INDICATE;
+
+    if (options.circularReferences
+        && typeof options.circularReferences === "string") {
+        switch (options.circularReferences.toLowerCase()) {
+            case "error":
+                options.circularReferences = constants.CIRCULAR_ERROR;
+                break;
+            case "remove":
+                options.circularReferences = constants.CIRCULAR_REMOVE;
+                break;
+            case "empty":
+                options.circularReferences = constants.CIRCULAR_EMPTY;
+                break;
+            case "indicate":
+                options.circularReferences = constants.CIRCULAR_INDICATE;
+                break;
+        }
+    }
+
+    return options;
+}
+
 function safeReduce(options) {
     let stack = [];
+
+    options = evaluateOptions(options);
 
     return function(key, value, stage) {
         if (stage === constants.BEGIN_STAGE)
@@ -61,12 +94,14 @@ function safeReduce(options) {
             stack = stack.slice(0, stack.indexOf(this));
 
         if (key !== "" && stack.indexOf(value) >= 0) {
-            if (options.indicateCircularWarnings)
-                return { __circular: true };
-            else if(options.errorOnCircularReference === true)
+            if (options.circularReferences === constants.CIRCULAR_ERROR)
                 throw new CircularReferenceError();
-            else
+            else if (options.circularReferences === constants.CIRCULAR_EMPTY)
                 return { };
+            else if (options.circularReferences === constants.CIRCULAR_INDICATE)
+                return { __circular: true };
+            else
+                return;
         }
 
         if (options.reducer)
